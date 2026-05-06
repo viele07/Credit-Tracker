@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#e63946" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sari-Sari" />
+  <meta name="description" content="Sari-Sari Store Credit Tracker" />
+  <title>Sari-Sari Store Credit Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       LOGIN SCREEN
+  ══════════════════════════════════════════ -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">🏪</div>
+      <h1>Sari-Sari Store</h1>
+      <p class="login-sub">Credit Tracker</p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" placeholder="Enter username"
+                 autocomplete="username" autocapitalize="none" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="login-password" placeholder="Enter password"
+                   autocomplete="current-password" required />
+            <button type="button" class="pw-toggle" onclick="togglePw('login-password', this)" aria-label="Show password">👁</button>
+          </div>
+        </div>
+        <div id="login-error" class="login-error hidden">Incorrect username or password.</div>
+        <button type="submit" class="btn btn-primary btn-block">Log In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       MAIN APP (hidden until logged in)
+  ══════════════════════════════════════════ -->
+  <div id="app" class="hidden">
+
+    <header>
+      <div class="header-top">
+        <h1>🏪 Sari-Sari Store</h1>
+        <div class="header-user">
+          <span id="header-role-badge" class="role-badge"></span>
+          <span id="header-username"></span>
+          <button class="btn-logout" onclick="logout()">Log Out</button>
+        </div>
+      </div>
+      <!-- Desktop top nav — hidden on mobile, shown via CSS at ≥768px -->
+      <nav id="main-nav" aria-label="Main navigation">
+        <!-- injected by JS -->
+      </nav>
+    </header>
+
+    <main>
+
+      <!-- ── ADMIN: Manage Items ── -->
+      <section id="tab-items" class="tab" role="tabpanel">
+        <h2>Item List</h2>
+        <form id="item-form" class="card">
+          <h3>Add New Item</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="item-name">Item Name</label>
+              <input type="text" id="item-name" placeholder="e.g. Coke 1L" required />
+            </div>
+            <div class="form-group">
+              <label for="item-price">Price (₱)</label>
+              <input type="number" id="item-price" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Item</button>
+          </div>
+        </form>
+
+        <div class="card">
+          <h3>Registered Items</h3>
+          <div id="items-empty" class="empty-state">No items yet. Add one above.</div>
+          <div class="table-wrap hidden" id="items-table-wrap">
+            <table id="items-table">
+              <thead>
+                <tr><th>#</th><th>Item Name</th><th>Price</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="items-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── ADMIN: Manage Customers ── -->
+      <section id="tab-customers" class="tab" role="tabpanel">
+        <h2>Customer List</h2>
+        <form id="customer-form" class="card">
+          <h3>Add New Customer</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cust-name">Full Name</label>
+              <input type="text" id="cust-name" placeholder="e.g. Juan dela Cruz" required />
+            </div>
+            <div class="form-group">
+              <label for="cust-username">Username</label>
+              <input type="text" id="cust-username" placeholder="e.g. juan123"
+                     autocapitalize="none" required />
+            </div>
+            <div class="form-group">
+              <label for="cust-password">Password</label>
+              <div class="pw-wrap">
+                <input type="password" id="cust-password" placeholder="Set password" required />
+                <button type="button" class="pw-toggle" onclick="togglePw('cust-password', this)" aria-label="Show password">👁</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:.75rem">
+            <div class="form-group">
+              <label for="cust-phone">Phone (optional)</label>
+              <input type="tel" id="cust-phone" placeholder="e.g. 09171234567" inputmode="tel" />
+            </div>
+            <div class="form-group">
+              <label for="cust-address">Address (optional)</label>
+              <input type="text" id="cust-address" placeholder="e.g. Blk 1 Lot 2" />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Customer</button>
+          </div>
+        </form>
+
+        <div class="card">
+          <h3>Registered Customers</h3>
+          <div id="customers-empty" class="empty-state">No customers yet. Add one above.</div>
+          <div class="table-wrap hidden" id="customers-table-wrap">
+            <table id="customers-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Name</th><th>Username</th>
+                  <th>Phone</th><th>Address</th>
+                  <th>Total Credit</th><th>Last Payment</th><th>PW Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── ADMIN + CUSTOMER: Record Credit ── -->
+      <section id="tab-credit" class="tab" role="tabpanel">
+        <h2>Record Credit Transaction</h2>
+
+        <div class="card">
+          <h3>Select Customer</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="credit-customer-select">Customer</label>
+              <select id="credit-customer-select">
+                <option value="">-- Choose a customer --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Transaction Date &amp; Time</label>
+              <input type="text" id="txn-datetime" readonly class="readonly-input" />
+            </div>
+          </div>
+          <div id="credit-no-customers" class="empty-state hidden">
+            Please add customers in <strong>Manage Customers</strong> first.
+          </div>
+          <div id="credit-cycle-info" class="cycle-info-line hidden"></div>
+        </div>
+
+        <div class="card">
+          <h3>Add Items to Credit</h3>
+          <div id="credit-no-items" class="empty-state">Please add items in <strong>Manage Items</strong> first.</div>
+          <div id="credit-item-selector" class="hidden">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="select-item">Select Item</label>
+                <select id="select-item">
+                  <option value="">-- Choose an item --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="select-qty">Quantity</label>
+                <input type="number" id="select-qty" value="1" min="1" inputmode="numeric" />
+              </div>
+              <button id="add-to-credit-btn" class="btn btn-primary">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Credit Items for This Transaction</h3>
+          <div id="credit-list-empty" class="empty-state">No items added yet.</div>
+          <div class="table-wrap hidden" id="credit-list-table-wrap">
+            <table id="credit-list-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Item</th><th>Unit Price</th>
+                  <th>Qty</th><th>Subtotal</th><th>✕</th>
+                </tr>
+              </thead>
+              <tbody id="credit-list-tbody"></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="4" class="total-label">Transaction Total</td>
+                  <td id="txn-total" class="total-value">₱0.00</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button id="save-credit-btn" class="btn btn-success btn-full" disabled>Save Credit Transaction</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── ADMIN: Credit Report ── -->
+      <section id="tab-report" class="tab" role="tabpanel">
+        <h2>Credit Report</h2>
+        <div class="report-controls card">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="filter-customer">Filter by Customer</label>
+              <input type="text" id="filter-customer" placeholder="Type name to filter…" />
+            </div>
+            <button id="print-report-btn" class="btn btn-secondary">🖨 Print</button>
+            <button id="clear-all-btn" class="btn btn-danger">🗑 Clear All</button>
+          </div>
+        </div>
+        <div id="report-empty" class="empty-state card">No credit transactions recorded yet.</div>
+        <div id="report-content" class="hidden">
+          <div id="report-transactions"></div>
+          <div class="grand-total-box">
+            <span class="grand-total-label">Grand Total</span>
+            <span id="grand-total" class="grand-total-value">₱0.00</span>
+          </div>
+          <div class="card" style="margin-top:1rem">
+            <h3>💳 Payment Records</h3>
+            <div id="report-payment-records">
+              <p class="empty-state">No payment records yet.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CUSTOMER: My Credits ── -->
+      <section id="tab-my-credits" class="tab" role="tabpanel">
+        <h2>My Credit History</h2>
+        <div class="report-controls card">
+          <div class="form-row">
+            <button id="print-my-report-btn" class="btn btn-secondary">🖨 Print</button>
+          </div>
+        </div>
+        <div id="my-report-empty" class="empty-state card">You have no credit transactions yet.</div>
+        <div id="my-report-content" class="hidden">
+          <div id="my-report-transactions"></div>
+          <div class="grand-total-box">
+            <span class="grand-total-label">My Total Credit</span>
+            <span id="my-grand-total" class="grand-total-value">₱0.00</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CUSTOMER: Make Payment ── -->
+      <section id="tab-payment" class="tab" role="tabpanel">
+        <!-- Content rendered dynamically by renderPaymentTab() -->
+      </section>
+
+      <!-- ── CUSTOMER: Change Password ── -->
+      <section id="tab-change-password" class="tab" role="tabpanel">
+        <h2>Change Password</h2>
+        <div class="card">
+          <h3>Update Your Password</h3>
+          <div class="form-group">
+            <label for="cp-current">Current Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="cp-current" placeholder="Enter current password"
+                     autocomplete="current-password" />
+              <button type="button" class="pw-toggle" onclick="togglePw('cp-current', this)" aria-label="Show">👁</button>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:.85rem">
+            <label for="cp-new">New Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="cp-new" placeholder="Choose a new password"
+                     autocomplete="new-password" />
+              <button type="button" class="pw-toggle" onclick="togglePw('cp-new', this)" aria-label="Show">👁</button>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:.85rem">
+            <label for="cp-confirm">Confirm New Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="cp-confirm" placeholder="Repeat new password"
+                     autocomplete="new-password" />
+              <button type="button" class="pw-toggle" onclick="togglePw('cp-confirm', this)" aria-label="Show">👁</button>
+            </div>
+          </div>
+          <div id="cp-error" class="login-error hidden" style="margin-top:.75rem"></div>
+          <div class="form-actions">
+            <button class="btn btn-primary btn-full" onclick="submitChangePassword()">Update Password</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ── Mobile bottom nav (hidden on desktop via CSS) ── -->
+    <nav id="bottom-nav" aria-label="Mobile navigation">
+      <!-- injected by JS -->
+    </nav>
+
+  </div><!-- /#app -->
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <!-- Admin: Reset password modal -->
+  <div id="pw-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pw-modal-title">
+    <div class="modal-box">
+      <h3 id="pw-modal-title">Reset Password</h3>
+      <p id="pw-modal-name" class="modal-sub"></p>
+      <p class="modal-note">A temporary password will be set. The customer must change it on next login.</p>
+      <div class="form-group" style="margin-top:1rem">
+        <label for="new-pw">Temporary Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="new-pw" placeholder="Enter temporary password"
+                 autocomplete="new-password" />
+          <button type="button" class="pw-toggle" onclick="togglePw('new-pw', this)" aria-label="Show password">👁</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-success" onclick="confirmResetPw()">Set &amp; Save</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer: Force change password modal -->
+  <div id="force-change-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-icon">🔐</div>
+      <h3>Change Your Password</h3>
+      <p class="modal-sub">Your password was reset by the admin. Set a new password to continue.</p>
+      <div class="form-group" style="margin-top:1rem">
+        <label for="force-current-pw">Temporary Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="force-current-pw" placeholder="Enter the temporary password"
+                 autocomplete="current-password" />
+          <button type="button" class="pw-toggle" onclick="togglePw('force-current-pw', this)" aria-label="Show">👁</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:.75rem">
+        <label for="force-new-pw">New Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="force-new-pw" placeholder="Choose a new password"
+                 autocomplete="new-password" />
+          <button type="button" class="pw-toggle" onclick="togglePw('force-new-pw', this)" aria-label="Show">👁</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:.75rem">
+        <label for="force-confirm-pw">Confirm New Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="force-confirm-pw" placeholder="Repeat new password"
+                 autocomplete="new-password" />
+          <button type="button" class="pw-toggle" onclick="togglePw('force-confirm-pw', this)" aria-label="Show">👁</button>
+        </div>
+      </div>
+      <div id="force-change-error" class="login-error hidden"></div>
+      <div class="modal-actions" style="margin-top:1.25rem">
+        <button class="btn btn-primary btn-block" onclick="confirmForceChange()">Save New Password</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Register service worker for PWA offline support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
