@@ -381,14 +381,14 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
-  <script>
-    // Register service worker for PWA offline support
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      });
-    }
-  </script>
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-box">
+      <div class="loading-spinner"></div>
+      <p id="loading-msg">Loading…</p>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
